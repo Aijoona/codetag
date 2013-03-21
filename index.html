@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Black and White</title>
+  </head>
+  <body>
+    <img src="image.jpg" id="img" />
+    <button onclick="transform(1)">1bit</button>
+    <button onclick="transform(2)">2bits</button>
+    <button onclick="transform(4)">4bits</button>
+    <button onclick="transform(8)">8bits</button>
+    <button onclick="restore()">Restore</button>
+
+    <script>
+      (function(global) {
+        function getImage() {
+          return document.getElementById('img')
+        }
+
+        function getImageHeight() {
+          return getImage().height
+        }
+
+        function getImageWidth() {
+          return getImage().width
+        }
+
+        function createCanvas() {
+          var canvas = document.createElement('canvas')
+
+          canvas.width = getImageWidth()
+          canvas.height = getImageHeight()
+
+          return canvas
+        }
+
+        function getImageData() {
+          var canvas, context, result
+
+          canvas = createCanvas()
+          context = canvas.getContext('2d')
+
+          context.drawImage(img, 0, 0)
+
+          return context.getImageData(0, 0, getImageWidth(), getImageHeight())
+        }
+
+        function getDataURIFromImageData(imageData) {
+          var canvas, context, result
+
+          canvas = createCanvas()
+          context = canvas.getContext('2d')
+
+          context.putImageData(imageData, 0, 0)
+
+          return canvas.toDataURL('image/png')
+        }
+
+        function setImageSrc(dataURI) {
+          getImage().src = dataURI;
+        }
+
+        function createTransformer(bits) {
+          var top
+
+          top = Math.pow(2, bits) - 1
+
+          return function(level) {
+            return Math.round(level * top / 255) * (255 / top) - 1
+          }
+        }
+
+        function transform(bits) {
+          var data, height, width, x, y, transformer, level
+
+          restore()
+
+          transformer = createTransformer(bits)
+          imageData = getImageData()
+          data = imageData.data
+          height = getImageHeight()
+          width = getImageWidth()
+
+          for (var y =0; y < height; y++) {
+              for (var x = 0; x < width; x++) {
+                  for (var c = 0; c < 3; c++) {
+                      level = transformer(
+                        data[(y * width + x) * 4 ],
+                        data[(y * width + x) * 4 + 1],
+                        data[(y * width + x) * 4 + 2]
+                      )
+
+                        data[(y * width + x) * 4 ] =
+                        data[(y * width + x) * 4 + 1] =
+                        data[(y * width + x) * 4 + 2] = level                     
+                  }
+              }
+          }
+
+          setImageSrc(
+            getDataURIFromImageData(
+              imageData
+            )
+          )
+        }
+
+        function restore() {
+          setImageSrc('image.jpg')
+        }
+
+        global.transform = transform
+        global.restore = restore
+      })(window)
+    </script>
+  </body>
+</html>
