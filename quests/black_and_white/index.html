@@ -81,13 +81,13 @@
           height = getImageHeight()
           width = getImageWidth()
 
-          for (var y =0; y < height; y++) {
+          for (var y = 0; y < height; y++) {
               for (var x = 0; x < width; x++) {
-                level = transformer(
-                  data[(y * width + x) * 4 ],
-                  data[(y * width + x) * 4 + 1],
+                level = transformer((
+                  data[(y * width + x) * 4 ] +
+                  data[(y * width + x) * 4 + 1] +
                   data[(y * width + x) * 4 + 2]
-                )
+                ) / 3)
 
                 data[(y * width + x) * 4 ] =
                 data[(y * width + x) * 4 + 1] =
